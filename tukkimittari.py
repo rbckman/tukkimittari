@@ -13,6 +13,7 @@ from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
 from kivy.config import Config
 from kivy.clock import Clock
+from kivy.core.window import Window
 from multiprocessing.pool import ThreadPool
 
 import time
@@ -154,5 +155,6 @@ class Tukkimittari(App):
 
         return root_widget
 
+Window.fullscreen = True
 Tukkimittari().run()
 
