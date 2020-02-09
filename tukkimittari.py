@@ -16,26 +16,56 @@ from kivy.clock import Clock
 from kivy.core.window import Window
 from multiprocessing.pool import ThreadPool
 
+from functools import partial
+
 import RPi.GPIO as GPIO
 import time
 import json
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setmode(GPIO.BCM)
+#GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+#GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+
 
 ###--------- LÄS ELLER NOLLA GIVARNA---------------
 
 def starta_givarna():
-    givare1 = False
-    givare2 = False
+    calib = 2
+    countcm = 0
+    oldcount = 0
+    counted = False
+    givare1 = True
+    givare2 = True
     while True:
-        print(GPIO.input(20))
-        print(GPIO.input(21))
-        time.sleep(0.005)
-        f = open("/dev/shm/kaparens_givare", "w")
-        f.write(str(givare1))
-        f.close()
+        oldcount = countcm
+        if GPIO.input(20) == 1:
+            givare1 = True
+        else:
+            givare1 = False
+
+        if GPIO.input(21) == 1:
+            givare2 = True
+        else:
+            givare2 = False
+
+        if givare1 == True and givare2 == False:
+            if counted == False:
+                countcm = countcm + calib
+                counted = True
+
+        if givare1 == False and givare2 == True:
+            if counted == False:
+                countcm = countcm - calib
+                counted = True
+
+        if givare1 == True and givare2 == True:
+            counted = False
+
+        if countcm != oldcount:
+            f = open("/dev/shm/kaparens_givare", "w")
+            f.write(str(countcm))
+            f.close()
+        #time.sleep(0.001)
 
 ###--------- SPARA, LÄS, RADERA, SÄTT TILL TRÄSLAG --------------
 
@@ -64,17 +94,27 @@ def tra_data_langd(tra_data, slag):
         if i['slag'] == slag:
             return i['langd']
 
+def tra_data_totlangd(tra_data, slag):
+    for i in tra_data:
+        if i['slag'] == slag:
+            return i['totlangd']
 
 ###---------- SJÄLVA GUYEN ---------------------
 
 class Tukkimittari(App):
     def build(self):
-        pool = ThreadPool(processes=1)
-        pool.apply_async(starta_givarna)
+        #pool = ThreadPool(processes=1)
+        #pool.apply_async(starta_givarna)
 
         def las_givarna(dt):
+            global givarna
             f = open("/dev/shm/kaparens_givare", "r")
-            langd_display.text = f.read()
+            givarna = f.read()
+            totlangd = tra_data_totlangd(tra_data, sort_input.text)
+            if totlangd == None:
+                totlangd = 0
+            if givarna != '':
+                langd_display.text = givarna + ' cm / ' + langd_input.text + ' cm / tot. ' + str(totlangd*0.01) + ' m'
 
         Clock.schedule_interval(las_givarna, 0.01)
 
@@ -162,7 +202,7 @@ class Tukkimittari(App):
 
         return root_widget
 
-Window.fullscreen = True
+Window.fullscreen = 'auto'
 Tukkimittari().run()
 GPIO.cleanup()
 
