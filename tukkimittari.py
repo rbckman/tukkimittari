@@ -16,15 +16,22 @@ from kivy.clock import Clock
 from kivy.core.window import Window
 from multiprocessing.pool import ThreadPool
 
+import RPi.GPIO as GPIO
 import time
 import json
+
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
 ###--------- LÄS ELLER NOLLA GIVARNA---------------
 
 def starta_givarna():
-    givare1 = 0
+    givare1 = False
+    givare2 = False
     while True:
-        givare1 += 1
+        print(GPIO.input(20))
+        print(GPIO.input(21))
         time.sleep(0.005)
         f = open("/dev/shm/kaparens_givare", "w")
         f.write(str(givare1))
@@ -157,4 +164,5 @@ class Tukkimittari(App):
 
 Window.fullscreen = True
 Tukkimittari().run()
+GPIO.cleanup()
 
