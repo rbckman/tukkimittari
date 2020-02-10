@@ -31,6 +31,9 @@ while True:
     else:
         givare2 = False
 
+    if givare1 == False and givare2 == False:
+        counted = False
+
     if givare1 == True and givare2 == False:
         if counted == False:
             countcm = countcm + calib
@@ -40,9 +43,6 @@ while True:
         if counted == False:
             countcm = countcm - calib
             counted = True
-
-    if givare1 == True and givare2 == True:
-        counted = False
 
     if countcm != oldcount:
         f = open("/dev/shm/kaparens_givare", "w")

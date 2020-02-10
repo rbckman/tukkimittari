@@ -22,50 +22,15 @@ import RPi.GPIO as GPIO
 import time
 import json
 
-#GPIO.setmode(GPIO.BCM)
-#GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-#GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(2, GPIO.OUT) #RELAY
+GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #NOLLARE
+GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #SVÄRD
 
+GPIO.output(2, GPIO.HIGH)
 
-###--------- LÄS ELLER NOLLA GIVARNA---------------
-
-def starta_givarna():
-    calib = 2
-    countcm = 0
-    oldcount = 0
-    counted = False
-    givare1 = True
-    givare2 = True
-    while True:
-        oldcount = countcm
-        if GPIO.input(20) == 1:
-            givare1 = True
-        else:
-            givare1 = False
-
-        if GPIO.input(21) == 1:
-            givare2 = True
-        else:
-            givare2 = False
-
-        if givare1 == True and givare2 == False:
-            if counted == False:
-                countcm = countcm + calib
-                counted = True
-
-        if givare1 == False and givare2 == True:
-            if counted == False:
-                countcm = countcm - calib
-                counted = True
-
-        if givare1 == True and givare2 == True:
-            counted = False
-
-        if countcm != oldcount:
-            f = open("/dev/shm/kaparens_givare", "w")
-            f.write(str(countcm))
-            f.close()
-        #time.sleep(0.001)
+givarna_tot = 0
+givarna = 0
 
 ###--------- SPARA, LÄS, RADERA, SÄTT TILL TRÄSLAG --------------
 
@@ -99,22 +64,76 @@ def tra_data_totlangd(tra_data, slag):
         if i['slag'] == slag:
             return i['totlangd']
 
+def tra_data_totlangd_add(tra_data, slag, langd_add):
+    c = 0
+    for i in tra_data:
+        if i['slag'] == slag:
+            totlangd = int(i['totlangd'])
+            totlangd = totlangd + langd_add
+            tra_data[c]['totlangd'] = totlangd
+        c = c + 1
+    tra_data_save(tra_data)
+
+def tra_data_lista(tra_data):
+    tra_lista = []
+    for i in tra_data:
+        tra_lista.append(i['slag'])
+    return tra_lista
+        
+
 ###---------- SJÄLVA GUYEN ---------------------
 
 class Tukkimittari(App):
     def build(self):
-        #pool = ThreadPool(processes=1)
-        #pool.apply_async(starta_givarna)
 
         def las_givarna(dt):
-            global givarna
-            f = open("/dev/shm/kaparens_givare", "r")
-            givarna = f.read()
-            totlangd = tra_data_totlangd(tra_data, sort_input.text)
-            if totlangd == None:
+            global givarna_tot, givarna, givarna_old
+            if givarna_tot == None:
+                givarna_tot = 0
+
+            if givarna - givarna_tot < 0 and givarna < 0:
+                givarna_tot + givarna_tot + 2
+
+            # LÄS GIVARNA
+            try:
+                f = open("/dev/shm/kaparens_givare", "r")
+                givarna = f.read()
+                givarna = int(givarna)
+            except:
+                givarna = givarna_old
+            givarna_old = givarna
+
+            # LÄS TRÄ SORTER
+            sort = sort_input.text
+            tra_lista = tra_data_lista(tra_data)
+
+            # SVÄRD
+            if GPIO.input(3) == False and givarna_tot != givarna:
+                tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
+                givarna_tot = givarna 
+                print(givarna_tot)
+                GPIO.output(2, GPIO.HIGH)
+
+            # ADD TOT LANGD
+            if GPIO.input(11) == True and givarna_tot != givarna:
+                tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
+
+            if sort in tra_lista:
+                totlangd = tra_data_totlangd(tra_data, sort)
+                langd = tra_data_langd(tra_data, sort)
+                langd = int(langd)
+            else:
                 totlangd = 0
-            if givarna != '':
-                langd_display.text = givarna + ' cm / ' + langd_input.text + ' cm / tot. ' + str(totlangd*0.01) + ' m'
+                langd = 0
+
+            # RELAY PÅ / AV
+            if givarna - givarna_tot >= langd:
+                GPIO.output(2, GPIO.LOW)
+            else:
+                GPIO.output(2, GPIO.HIGH)
+
+            # DISPLAY
+            langd_display.text = str(givarna - givarna_tot) + ' cm / ' + str(langd) + ' cm / tot. ' + str(int(totlangd*0.01)) + ' m'
 
         Clock.schedule_interval(las_givarna, 0.01)
 
