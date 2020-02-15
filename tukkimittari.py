@@ -15,6 +15,7 @@ from kivy.config import Config
 from kivy.clock import Clock
 from kivy.core.window import Window
 from multiprocessing.pool import ThreadPool
+import os
 
 from functools import partial
 
@@ -31,6 +32,27 @@ GPIO.output(2, GPIO.HIGH)
 
 givarna_tot = 0
 givarna = 0
+
+class startup():
+    # Get path of the current dir, then use it as working directory:
+    rundir = os.path.dirname(__file__)
+    if rundir != '':
+        os.chdir(rundir)
+    filmfolder = "/home/pi/Videos/"
+    if os.path.isdir(filmfolder) == False:
+        os.makedirs(filmfolder)
+    folderdir = os.getcwd()
+
+
+    ### -------- CHECK FOR UPDATES -------------------
+
+    os.system('git -C ' + folderdir + ' pull')
+
+    ### -------- START GIVARNA -----------------------
+
+    os.system('/usr/bin/python3 ' + folderdir + '/givarna.py &')
+
+
 
 ###--------- SPARA, LÄS, RADERA, SÄTT TILL TRÄSLAG --------------
 
@@ -222,6 +244,8 @@ class Tukkimittari(App):
         return root_widget
 
 Window.fullscreen = 'auto'
+startup()
 Tukkimittari().run()
+os.system('pkill python3')
 GPIO.cleanup()
 
