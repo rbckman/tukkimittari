@@ -21,12 +21,12 @@ givare1 = True
 givare2 = True
 while True:
     oldcount = countcm
-    if GPIO.input(20) == 1:
+    if GPIO.input(21) == 1:
         givare1 = True
     else:
         givare1 = False
 
-    if GPIO.input(21) == 1:
+    if GPIO.input(20) == 1:
         givare2 = True
     else:
         givare2 = False
