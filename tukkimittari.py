@@ -158,12 +158,11 @@ class Tukkimittari(App):
 
             # SVÄRD
             if GPIO.input(3) == False and givarna_tot != givarna:
-                tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
-                givarna_tot = givarna 
-                print(givarna_tot)
                 GPIO.output(2, GPIO.HIGH)
                 if add_tot == True:
                     tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
+                givarna_tot = givarna 
+                print(givarna_tot)
 
             # ADD TOT LANGD
             if GPIO.input(17) == False:
