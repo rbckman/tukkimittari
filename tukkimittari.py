@@ -11,10 +11,11 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.textinput import TextInput
+from kivy.uix.vkeyboard import VKeyboard
+from kivy.uix.popup import Popup
 from kivy.config import Config
 from kivy.clock import Clock
 from kivy.core.window import Window
-from kivy.uix.vkeyboard import VKeyboard
 from multiprocessing.pool import ThreadPool
 import os
 
@@ -26,32 +27,40 @@ import json
 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(2, GPIO.OUT) #RELAY
-GPIO.setup(11, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #NOLLARE
-GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_DOWN) #SVÄRD
+GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP) #NOLLARE
+GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP) #SVÄRD
 
 GPIO.output(2, GPIO.HIGH)
 
 givarna_tot = 0
 givarna = 0
+add_tot = False
+btntime = time.time()
 
-class startup():
-    # Get path of the current dir, then use it as working directory:
-    rundir = os.path.dirname(__file__)
-    if rundir != '':
-        os.chdir(rundir)
-    filmfolder = "/home/pi/Videos/"
-    if os.path.isdir(filmfolder) == False:
-        os.makedirs(filmfolder)
-    folderdir = os.getcwd()
+# Get path of the current dir, then use it as working directory:
+rundir = os.path.dirname(__file__)
+if rundir != '':
+    os.chdir(rundir)
+filmfolder = "/home/pi/Videos/"
+if os.path.isdir(filmfolder) == False:
+    os.makedirs(filmfolder)
+folderdir = os.getcwd()
 
 
-    ### -------- CHECK FOR UPDATES -------------------
+### -------- CHECK FOR UPDATES -------------------
 
-    os.system('git -C ' + folderdir + ' pull')
+os.system('git -C ' + folderdir + ' pull')
 
-    ### -------- START GIVARNA -----------------------
+### --------- CHECK VERSION ------------------
 
-    os.system('/usr/bin/python3 ' + folderdir + '/givarna.py &')
+with open(folderdir + '/VERSION') as f:
+    version = f.readline().rstrip()
+    vername = f.readline().rstrip()
+    madeby = f.readline().rstrip()
+
+### -------- START GIVARNA -----------------------
+
+os.system('/usr/bin/python3 ' + folderdir + '/givarna.py &')
 
 
 
@@ -127,7 +136,7 @@ class Tukkimittari(App):
     def build(self):
 
         def las_givarna(dt):
-            global givarna_tot, givarna, givarna_old
+            global givarna_tot, givarna, givarna_old, add_tot, btntime
             if givarna_tot == None:
                 givarna_tot = 0
 
@@ -153,10 +162,22 @@ class Tukkimittari(App):
                 givarna_tot = givarna 
                 print(givarna_tot)
                 GPIO.output(2, GPIO.HIGH)
+                if add_tot == True:
+                    tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
 
             # ADD TOT LANGD
-            if GPIO.input(11) == True and givarna_tot != givarna:
-                tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
+            if GPIO.input(17) == False:
+                print(time.time() - btntime)
+                if time.time() - btntime > 1:
+                    if add_tot == True:
+                        add_tot = False
+                        btntime = time.time()
+                        adding_label.text = 'NOPE'
+                    else:
+                        add_tot = True
+                        btntime = time.time()
+                        adding_label.text = 'ADDING'
+                    #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
 
             if sort in tra_lista:
                 totlangd = tra_data_totlangd(tra_data, sort)
@@ -173,7 +194,7 @@ class Tukkimittari(App):
                 GPIO.output(2, GPIO.HIGH)
 
             # DISPLAY
-            langd_display.text = str(givarna - givarna_tot) + ' cm / ' + str(langd) + ' cm / tot. ' + str(int(totlangd*0.01)) + ' m'
+            langd_display.text = str(givarna - givarna_tot) + ' cm / ' + str(langd) + ' cm / tot. ' + str(round(totlangd*0.01,1)) + ' m'
 
         Clock.schedule_interval(las_givarna, 0.01)
 
@@ -206,25 +227,58 @@ class Tukkimittari(App):
             update_buttons()
 
         def remove_tra_slag(instance):
-            tra_data_remove(tra_data, sort_input.text)
-            for i in tra_button_grid.children:
-                print(i)
-                print(i.text)
-                if i.text == sort_input.text:
-                    tra_button_grid.remove_widget(i)
-            update_buttons()
+            def yes(instance):
+                tra_data_remove(tra_data, sort_input.text)
+                for i in tra_button_grid.children:
+                    print(i)
+                    print(i.text)
+                    if i.text == sort_input.text:
+                        tra_button_grid.remove_widget(i)
+                update_buttons()
+                popup.dismiss()
+
+            yes_button = Button(text='Joo')
+            no_button = Button(text='Nää')
+
+            popup_widget = BoxLayout(orientation='vertical')
+            popup_widget.add_widget(Label(text='E du nu rikit sääkär?'))
+            popup_widget.add_widget(no_button)
+            popup_widget.add_widget(yes_button)
+            popup = Popup(title='Radera ' + sort_input.text, content=popup_widget, size_hint=(0.5,0.5))
+
+            yes_button.bind(on_press=yes)
+            no_button.bind(on_press=popup.dismiss)
+
+            popup.open()
+
  
         def tra_button_action(instance):
             sort_input.text = instance.text
             langd_input.text = tra_data_langd(tra_data, instance.text)
 
         def nolla(instance):
-            tra_data_totlangd_add(tra_data, sort_input.text, 'nolla')
+            def yes(instance):
+                tra_data_totlangd_add(tra_data, sort_input.text, 'nolla')
+                popup.dismiss()
+
+            yes_button = Button(text='Joo')
+            no_button = Button(text='Nää')
+
+            popup_widget = BoxLayout(orientation='vertical')
+            popup_widget.add_widget(Label(text='E du nu rikit sääkär?'))
+            popup_widget.add_widget(no_button)
+            popup_widget.add_widget(yes_button)
+            popup = Popup(title='Nolla totala längden', content=popup_widget, size_hint=(0.5,0.5))
+
+            yes_button.bind(on_press=yes)
+            no_button.bind(on_press=popup.dismiss)
+
+            popup.open()
 
         def exit(instance):
             App.get_running_app().stop()
 
-        upper_button_grid = GridLayout(cols=3, size_hint_y=0.6)
+        upper_button_grid = GridLayout(cols=5, size_hint_y=0.6)
         langd_display = Label(size_hint_y=2, font_size=50)
         edit_button_grid = GridLayout(cols=6, size_hint_y=2)
         tra_button_grid = GridLayout(cols=10, size_hint_y=2)
@@ -249,9 +303,13 @@ class Tukkimittari(App):
         exit_button = Button(text='Quit')
         exit_button.bind(on_press=exit)
 
-        name_button = TextInput(text='Namn', halign='center', multiline=False, font_size=25, size_hint_x=4)
+        name_label = Label(text=vername + ' ~ ' + version, halign='center', font_size=25, size_hint_x=4)
+        madeby_label = Label(text=madeby, halign='center', font_size=12, size_hint_x=4)
+        adding_label = Label(text='NOPE', halign='center', font_size=12)
 
-        upper_button_grid.add_widget(name_button)
+        upper_button_grid.add_widget(name_label)
+        upper_button_grid.add_widget(madeby_label)
+        upper_button_grid.add_widget(adding_label)
         upper_button_grid.add_widget(nolla_button)
         upper_button_grid.add_widget(exit_button) 
 
@@ -278,7 +336,6 @@ class Tukkimittari(App):
         return root_widget
 
 Window.fullscreen = 'auto'
-startup()
 Tukkimittari().run()
 os.system('pkill python3')
 GPIO.cleanup()
