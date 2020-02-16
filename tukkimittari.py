@@ -14,6 +14,7 @@ from kivy.uix.textinput import TextInput
 from kivy.config import Config
 from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.uix.vkeyboard import VKeyboard
 from multiprocessing.pool import ThreadPool
 import os
 
@@ -56,6 +57,8 @@ class startup():
 
 ###--------- SPARA, LÄS, RADERA, SÄTT TILL TRÄSLAG --------------
 
+# FILE I/O
+
 try:
     tra_data = json.load(open('tra_data.json'))
 except:
@@ -68,13 +71,7 @@ def tra_data_add(tra_data, slag, langd, totlangd):
     tra_data.append({'slag':slag, 'langd':langd, 'totlangd':totlangd})
     json.dump(tra_data,open('tra_data.json','w'))
 
-def tra_data_remove(tra_data, slag):
-    c = 0
-    for i in tra_data:
-        if i['slag'] == slag:
-            tra_data.pop(c)
-        c = c + 1
-    tra_data_save(tra_data)
+# GET
 
 def tra_data_langd(tra_data, slag):
     for i in tra_data:
@@ -86,22 +83,43 @@ def tra_data_totlangd(tra_data, slag):
         if i['slag'] == slag:
             return i['totlangd']
 
-def tra_data_totlangd_add(tra_data, slag, langd_add):
-    c = 0
-    for i in tra_data:
-        if i['slag'] == slag:
-            totlangd = int(i['totlangd'])
-            totlangd = totlangd + langd_add
-            tra_data[c]['totlangd'] = totlangd
-        c = c + 1
-    tra_data_save(tra_data)
-
 def tra_data_lista(tra_data):
     tra_lista = []
     for i in tra_data:
         tra_lista.append(i['slag'])
     return tra_lista
-        
+     
+# PUT
+
+def tra_data_remove(tra_data, slag):
+    c = 0
+    for i in tra_data:
+        if i['slag'] == slag:
+            tra_data.pop(c)
+        c = c + 1
+    tra_data_save(tra_data)
+
+def tra_data_totlangd_add(tra_data, slag, langd_add):
+    c = 0
+    for i in tra_data:
+        if i['slag'] == slag:
+            totlangd = int(i['totlangd'])
+            if langd_add == 'nolla':
+                totlangd = 0
+            else:
+                totlangd = totlangd + langd_add
+            tra_data[c]['totlangd'] = totlangd
+        c = c + 1
+    tra_data_save(tra_data)
+
+def tra_data_edit_langd(tra_data, slag, langd):   
+    c = 0
+    for i in tra_data:
+        if i['slag'] == slag:
+            tra_data[c]['langd'] = langd
+        c = c + 1
+    tra_data_save(tra_data)
+
 
 ###---------- SJÄLVA GUYEN ---------------------
 
@@ -161,9 +179,11 @@ class Tukkimittari(App):
 
         root_widget = BoxLayout(orientation='vertical')
 
+        # namn_button       | Ny   | Ladda
+        # ------------------------------------------------------------------------
         # langd_display     | Sort | Mått läsare | inställd längd | totala längden
         # ------------------------------------------------------------------------
-        # edit_button_grid  | edit sort | edit längd | nolla totala | Remove | Add
+        # edit_button_grid  | edit sort | edit längd | exit | Remove | Add
         # ------------------------------------------------------------------------
         # tra_button_grid   | Björk | Gran | Tall | Asp | Ved |
         # ------------------------------------------------------------------------
@@ -177,6 +197,7 @@ class Tukkimittari(App):
                 button.bind(on_press=tra_button_action)
 
         def edit_tra_slag(instance):
+            tra_data_edit_langd(tra_data, sort_input.text, langd_input.text)
             langd_display.text = sort_input.text + langd_input.text
 
         def add_tra_slag(instance):
@@ -198,11 +219,15 @@ class Tukkimittari(App):
             langd_input.text = tra_data_langd(tra_data, instance.text)
 
         def nolla(instance):
-            nolla_givaren()
+            tra_data_totlangd_add(tra_data, sort_input.text, 'nolla')
 
-        langd_display = Label(size_hint_y=1, font_size=50)
-        edit_button_grid = GridLayout(cols=6, size_hint_y=1)
-        tra_button_grid = GridLayout(cols=10, size_hint_y=1)
+        def exit(instance):
+            App.get_running_app().stop()
+
+        upper_button_grid = GridLayout(cols=3, size_hint_y=0.6)
+        langd_display = Label(size_hint_y=2, font_size=50)
+        edit_button_grid = GridLayout(cols=6, size_hint_y=2)
+        tra_button_grid = GridLayout(cols=10, size_hint_y=2)
 
         count_tra_slag()
 
@@ -215,19 +240,28 @@ class Tukkimittari(App):
         add_button = Button(text='Add')
         add_button.bind(on_press=add_tra_slag)
 
-        remove_button = Button(text='Remove')
+        remove_button = Button(text='Remove', size_hint_x=0.5)
         remove_button.bind(on_press=remove_tra_slag)
 
-        nolla_button = Button(text='Nolla')
+        nolla_button = Button(text='Nolla tot.')
         nolla_button.bind(on_press=nolla)
+
+        exit_button = Button(text='Quit')
+        exit_button.bind(on_press=exit)
+
+        name_button = TextInput(text='Namn', halign='center', multiline=False, font_size=25, size_hint_x=4)
+
+        upper_button_grid.add_widget(name_button)
+        upper_button_grid.add_widget(nolla_button)
+        upper_button_grid.add_widget(exit_button) 
 
         edit_button_grid.add_widget(sort_input)
         edit_button_grid.add_widget(langd_input)
         edit_button_grid.add_widget(apply_button)
-        edit_button_grid.add_widget(nolla_button)
-        edit_button_grid.add_widget(remove_button)
         edit_button_grid.add_widget(add_button)
+        edit_button_grid.add_widget(remove_button)
 
+        root_widget.add_widget(upper_button_grid)
         root_widget.add_widget(langd_display)
         root_widget.add_widget(edit_button_grid)
         root_widget.add_widget(tra_button_grid)
