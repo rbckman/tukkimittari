@@ -45,6 +45,9 @@ while True:
             counted = True
 
     if countcm != oldcount:
-        f = open("/dev/shm/kaparens_givare", "w")
-        f.write(str(countcm))
-        f.close()
+        try:
+            f = open("/dev/shm/kaparens_givare", "w")
+            f.write(str(countcm))
+            f.close()
+        except:
+            pass
