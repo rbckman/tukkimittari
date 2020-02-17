@@ -32,8 +32,8 @@ GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP) #SVÄRD
 
 GPIO.output(2, GPIO.HIGH)
 
-givarna_tot = 0
-givarna = 0
+givarna_tot = 0.0
+givarna = 0.0
 add_tot = False
 btntime = time.time()
 
@@ -138,16 +138,16 @@ class Tukkimittari(App):
         def las_givarna(dt):
             global givarna_tot, givarna, givarna_old, add_tot, btntime
             if givarna_tot == None:
-                givarna_tot = 0
+                givarna_tot = 0.0
 
-            if givarna - givarna_tot < 0 and givarna < 0:
-                givarna_tot + givarna_tot + 2
+            #if givarna - givarna_tot < 0 and givarna < 0:
+            #    givarna_tot + givarna_tot + 2
 
             # LÄS GIVARNA
             try:
                 f = open("/dev/shm/kaparens_givare", "r")
                 givarna = f.read()
-                givarna = int(givarna)
+                givarna = givarna * 0.01
             except:
                 givarna = givarna_old
             givarna_old = givarna
@@ -181,10 +181,10 @@ class Tukkimittari(App):
             if sort in tra_lista:
                 totlangd = tra_data_totlangd(tra_data, sort)
                 langd = tra_data_langd(tra_data, sort)
-                langd = int(langd)
+                langd = float(langd)
             else:
-                totlangd = 0
-                langd = 0
+                totlangd = 0.0
+                langd = 0.0
 
             # RELAY PÅ / AV
             if givarna - givarna_tot >= langd:
@@ -193,7 +193,7 @@ class Tukkimittari(App):
                 GPIO.output(2, GPIO.HIGH)
 
             # DISPLAY
-            langd_display.text = str(givarna - givarna_tot) + ' cm / ' + str(langd) + ' cm / tot. ' + str(round(totlangd*0.01,1)) + ' m'
+            langd_display.text = str(round(givarna - givarna_tot,1)) + ' cm / ' + str(round(langd,1)) + ' cm / tot. ' + str(round(totlangd*0.01,1)) + ' m'
 
         Clock.schedule_interval(las_givarna, 0.1)
 
