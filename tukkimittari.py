@@ -195,7 +195,7 @@ class Tukkimittari(App):
             # DISPLAY
             langd_display.text = str(givarna - givarna_tot) + ' cm / ' + str(langd) + ' cm / tot. ' + str(round(totlangd*0.01,1)) + ' m'
 
-        Clock.schedule_interval(las_givarna, 0.01)
+        Clock.schedule_interval(las_givarna, 0.1)
 
         root_widget = BoxLayout(orientation='vertical')
 
