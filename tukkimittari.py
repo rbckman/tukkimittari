@@ -130,6 +130,7 @@ def tra_data_edit_langd(tra_data, slag, langd):
 
 class Tukkimittari(App):
     def build(self):
+        givarna_old = 0.0
         givarna_tot = 0.0
         givarna = 0.0
         add_tot = False
