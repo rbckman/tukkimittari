@@ -63,8 +63,6 @@ with open(folderdir + '/VERSION') as f:
 
 os.system('/usr/bin/python3 ' + folderdir + '/givarna.py &')
 
-
-
 ###--------- SPARA, LÄS, RADERA, SÄTT TILL TRÄSLAG --------------
 
 # FILE I/O
@@ -193,7 +191,7 @@ class Tukkimittari(App):
                 GPIO.output(2, GPIO.HIGH)
 
             # DISPLAY
-            langd_display.text = str(round(givarna - givarna_tot)) + ' cm / ' + str(round(langd)) + ' cm / tot. ' + str(round(totlangd*0.01,1)) + ' m'
+            langd_display.text = str(round(givarna - givarna_tot,1)) + ' cm / ' + str(round(langd,1)) + ' cm / tot. ' + str(round(totlangd*0.01,1)) + ' m'
 
         Clock.schedule_interval(las_givarna, 0.01)
 
