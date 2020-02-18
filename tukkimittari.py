@@ -32,10 +32,7 @@ GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP) #SVÄRD
 
 GPIO.output(2, GPIO.HIGH)
 
-givarna_tot = 0.0
-givarna = 0.0
-add_tot = False
-btntime = time.time()
+
 
 # Get path of the current dir, then use it as working directory:
 rundir = os.path.dirname(__file__)
@@ -129,12 +126,14 @@ def tra_data_edit_langd(tra_data, slag, langd):
         c = c + 1
     tra_data_save(tra_data)
 
-
 ###---------- SJÄLVA GUYEN ---------------------
 
 class Tukkimittari(App):
     def build(self):
-
+        givarna_tot = 0.0
+        givarna = 0.0
+        add_tot = False
+        btntime = time.time()
         def las_givarna(dt):
             global givarna_tot, givarna, givarna_old, add_tot, btntime
             if givarna_tot == None:
