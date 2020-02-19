@@ -23,16 +23,13 @@ while True:
     oldcount = countcm
     if GPIO.input(21) == 1:
         givare1 = False
-    else:
+    if GPIO.input(21) == 0:
         givare1 = True
 
     if GPIO.input(20) == 1:
         givare2 = False
-    else:
+    if GPIO.input(20 == 0:
         givare2 = True
-
-    if givare1 == False and givare2 == False:
-        counted = False
 
     if givare1 == True and givare2 == False:
         if counted == False:
@@ -44,6 +41,9 @@ while True:
             countcm = countcm - calib
             counted = True
 
+    if givare1 == False and givare2 == False:
+        counted = False
+
     if countcm != oldcount:
         #print(str(countcm))
         try:
@@ -53,4 +53,4 @@ while True:
         except:
             pass
 
-    time.sleep(0.0000001)
+    time.sleep(0.0001)
