@@ -13,7 +13,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-calib = 198
+calib = 200
 countcm = 0
 oldcount = 0
 counted = False
@@ -53,4 +53,4 @@ while True:
         except:
             pass
 
-    time.sleep(0.000001)
+    time.sleep(0.0000001)
