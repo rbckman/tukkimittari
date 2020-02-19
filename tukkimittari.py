@@ -30,13 +30,8 @@ GPIO.setup(2, GPIO.OUT) #RELAY
 GPIO.setup(17, GPIO.IN, pull_up_down=GPIO.PUD_UP) #NOLLARE
 GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP) #SVÄRD
 
-GPIO.output(2, GPIO.HIGH)
+GPIO.output(2, GPIO.LOW)
 
-givarna_old = 0.0
-givarna_tot = 0.0
-givarna = 0.0
-add_tot = False
-btntime = time.time()
 
 # Get path of the current dir, then use it as working directory:
 rundir = os.path.dirname(__file__)
@@ -130,11 +125,21 @@ def tra_data_edit_langd(tra_data, slag, langd):
 
 ###---------- SJÄLVA GUYEN ---------------------
 
-class Tukkimittari(App):
-    def build(self):
 
+#standard values
+givarna_old = 0.0
+givarna_tot = 0.0
+givarna = 0.0
+nolla_givarna = False
+add_tot = False
+btntime = time.time()
+
+
+class Tukkimittari(App):
+
+    def build(self):
         def las_givarna(dt):
-            global givarna_tot, givarna, givarna_old, add_tot, btntime
+            global givarna_tot, givarna, givarna_old, add_tot, btntime, nolla_givarna
             if givarna_tot == None:
                 givarna_tot = 0.0
 
@@ -145,7 +150,7 @@ class Tukkimittari(App):
             try:
                 f = open("/dev/shm/kaparens_givare", "r")
                 givarna = f.read()
-                givarna = givarna * 0.01
+                givarna = int(givarna) * 0.01
             except:
                 givarna = givarna_old
             givarna_old = givarna
@@ -156,11 +161,16 @@ class Tukkimittari(App):
 
             # SVÄRD
             if GPIO.input(3) == False and givarna_tot != givarna:
-                GPIO.output(2, GPIO.HIGH)
+                GPIO.output(2, GPIO.LOW)
                 if add_tot == True:
                     tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
                 givarna_tot = givarna 
-                print(givarna_tot)
+                #print(givarna_tot)
+
+            # NOLLA
+            if nolla_givarna == True:
+                givarna_tot = givarna 
+                nolla_givarna = False
 
             # ADD TOT LANGD
             if GPIO.input(17) == False:
@@ -170,10 +180,12 @@ class Tukkimittari(App):
                         add_tot = False
                         btntime = time.time()
                         adding_label.text = 'NOPE'
+                        langd_display.color = [1,0,0,1]
                     else:
                         add_tot = True
                         btntime = time.time()
                         adding_label.text = 'ADDING'
+                        langd_display.color = [0,1,0,1]
                     #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
 
             if sort in tra_lista:
@@ -186,12 +198,12 @@ class Tukkimittari(App):
 
             # RELAY PÅ / AV
             if givarna - givarna_tot >= langd:
-                GPIO.output(2, GPIO.LOW)
-            else:
                 GPIO.output(2, GPIO.HIGH)
+            else:
+                GPIO.output(2, GPIO.LOW)
 
             # DISPLAY
-            langd_display.text = str(round(givarna - givarna_tot,1)) + ' cm / ' + str(round(langd,1)) + ' cm / tot. ' + str(round(totlangd*0.01,1)) + ' m'
+            langd_display.text = str(round(givarna - givarna_tot)) + ' cm / ' + str(round(langd)) + ' cm / tot. ' + str(round(totlangd*0.01,1)) + ' m'
 
         Clock.schedule_interval(las_givarna, 0.01)
 
@@ -223,6 +235,13 @@ class Tukkimittari(App):
             tra_button_grid.add_widget(Button(text=sort_input.text))
             update_buttons()
 
+        def nolla(instance):
+            global nolla_givarna
+            nolla_givarna = True
+
+        def off(instance):
+            os.system('shutdown -h now')
+
         def remove_tra_slag(instance):
             def yes(instance):
                 tra_data_remove(tra_data, sort_input.text)
@@ -253,7 +272,7 @@ class Tukkimittari(App):
             sort_input.text = instance.text
             langd_input.text = tra_data_langd(tra_data, instance.text)
 
-        def nolla(instance):
+        def nollatot(instance):
             def yes(instance):
                 tra_data_totlangd_add(tra_data, sort_input.text, 'nolla')
                 popup.dismiss()
@@ -275,7 +294,7 @@ class Tukkimittari(App):
         def exit(instance):
             App.get_running_app().stop()
 
-        upper_button_grid = GridLayout(cols=5, size_hint_y=0.6)
+        upper_button_grid = GridLayout(cols=6, size_hint_y=0.6)
         langd_display = Label(size_hint_y=2, font_size=50)
         edit_button_grid = GridLayout(cols=6, size_hint_y=2)
         tra_button_grid = GridLayout(cols=10, size_hint_y=2)
@@ -288,17 +307,23 @@ class Tukkimittari(App):
         apply_button = Button(text='Apply')
         apply_button.bind(on_press=edit_tra_slag)
 
+        nolla_button = Button(text='Nolla')
+        nolla_button.bind(on_press=nolla)
+
         add_button = Button(text='Add')
         add_button.bind(on_press=add_tra_slag)
 
         remove_button = Button(text='Remove', size_hint_x=0.5)
         remove_button.bind(on_press=remove_tra_slag)
 
-        nolla_button = Button(text='Nolla tot.')
-        nolla_button.bind(on_press=nolla)
+        nollatot_button = Button(text='Nolla tot.')
+        nollatot_button.bind(on_press=nollatot)
 
         exit_button = Button(text='Quit')
         exit_button.bind(on_press=exit)
+
+        shutdown_button = Button(text='OFF')
+        shutdown_button.bind(on_press=off)
 
         name_label = Label(text=vername + ' ~ ' + version, halign='center', font_size=25, size_hint_x=4)
         madeby_label = Label(text=madeby, halign='center', font_size=12, size_hint_x=4)
@@ -307,12 +332,14 @@ class Tukkimittari(App):
         upper_button_grid.add_widget(name_label)
         upper_button_grid.add_widget(madeby_label)
         upper_button_grid.add_widget(adding_label)
-        upper_button_grid.add_widget(nolla_button)
+        upper_button_grid.add_widget(nollatot_button)
         upper_button_grid.add_widget(exit_button) 
+        upper_button_grid.add_widget(shutdown_button) 
 
         edit_button_grid.add_widget(sort_input)
         edit_button_grid.add_widget(langd_input)
         edit_button_grid.add_widget(apply_button)
+        edit_button_grid.add_widget(nolla_button)
         edit_button_grid.add_widget(add_button)
         edit_button_grid.add_widget(remove_button)
 
