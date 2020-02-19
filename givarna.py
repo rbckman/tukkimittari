@@ -53,4 +53,4 @@ while True:
         except:
             pass
 
-    time.sleep(0.00001)
+    time.sleep(0.000001)
