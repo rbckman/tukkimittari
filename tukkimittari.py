@@ -56,7 +56,7 @@ with open(folderdir + '/VERSION') as f:
 
 ### -------- START GIVARNA -----------------------
 
-os.system('/usr/bin/python3 ' + folderdir + '/givarna.py &')
+os.system(folderdir + '/startgivarna.sh &')
 
 ###--------- SPARA, LÄS, RADERA, SÄTT TILL TRÄSLAG --------------
 
@@ -148,7 +148,7 @@ class Tukkimittari(App):
 
             # LÄS GIVARNA
             try:
-                f = open("/dev/shm/kaparens_givare", "r")
+                f = open("/dev/shm/givarna", "r")
                 givarna = f.read()
                 givarna = int(givarna) * 0.01
             except:
@@ -181,11 +181,15 @@ class Tukkimittari(App):
                         btntime = time.time()
                         adding_label.text = 'NOPE'
                         langd_display.color = [1,0,0,1]
+                        langd_selected.color = [1,0,0,1]
+                        langd_tot.color = [1,0,0,1]
                     else:
                         add_tot = True
                         btntime = time.time()
                         adding_label.text = 'ADDING'
                         langd_display.color = [0,1,0,1]
+                        langd_selected.color = [0,1,0,1]
+                        langd_tot.color = [0,1,0,1]
                     #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
 
             if sort in tra_lista:
@@ -203,9 +207,11 @@ class Tukkimittari(App):
                 GPIO.output(2, GPIO.LOW)
 
             # DISPLAY
-            langd_display.text = str(round(givarna - givarna_tot)) + ' cm / ' + str(round(langd)) + ' cm / tot. ' + str(round(totlangd*0.01,1)) + ' m'
+            langd_display.text = str(round(givarna - givarna_tot)) + ' cm'
+            langd_selected.text = str(round(langd)) + ' cm'
+            langd_tot.text = 'tot. ' + str(round(totlangd*0.01,1)) + ' m'
 
-        Clock.schedule_interval(las_givarna, 0.01)
+        Clock.schedule_interval(las_givarna, 0.05)
 
         root_widget = BoxLayout(orientation='vertical')
 
@@ -228,7 +234,6 @@ class Tukkimittari(App):
 
         def edit_tra_slag(instance):
             tra_data_edit_langd(tra_data, sort_input.text, langd_input.text)
-            langd_display.text = sort_input.text + langd_input.text
 
         def add_tra_slag(instance):
             tra_data_add(tra_data, sort_input.text, langd_input.text, 0)
@@ -295,9 +300,17 @@ class Tukkimittari(App):
             App.get_running_app().stop()
 
         upper_button_grid = GridLayout(cols=6, size_hint_y=0.6)
-        langd_display = Label(size_hint_y=2, font_size=50)
+        screen_grid = GridLayout(cols=2, size_hint_y=3)
+        langd_display = Label(font_size=100)
+        langd_tot_grid = GridLayout(cols=1, size_hint_x=0.5)
+        langd_selected = Label(font_size=60, size_hint_y=2, halign="left", valign="bottom")
+        langd_tot = Label(font_size=30, halign="left", valign="top")
+        langd_display.color = [1,0,0,1]
+        langd_selected.color = [1,0,0,1]
+        langd_tot.color = [1,0,0,1]
         edit_button_grid = GridLayout(cols=6, size_hint_y=2)
         tra_button_grid = GridLayout(cols=10, size_hint_y=2)
+
 
         count_tra_slag()
 
@@ -336,6 +349,11 @@ class Tukkimittari(App):
         upper_button_grid.add_widget(exit_button) 
         upper_button_grid.add_widget(shutdown_button) 
 
+        screen_grid.add_widget(langd_display)
+        screen_grid.add_widget(langd_tot_grid)
+        langd_tot_grid.add_widget(langd_selected)
+        langd_tot_grid.add_widget(langd_tot)
+
         edit_button_grid.add_widget(sort_input)
         edit_button_grid.add_widget(langd_input)
         edit_button_grid.add_widget(apply_button)
@@ -344,7 +362,7 @@ class Tukkimittari(App):
         edit_button_grid.add_widget(remove_button)
 
         root_widget.add_widget(upper_button_grid)
-        root_widget.add_widget(langd_display)
+        root_widget.add_widget(screen_grid)
         root_widget.add_widget(edit_button_grid)
         root_widget.add_widget(tra_button_grid)
 
@@ -361,6 +379,6 @@ class Tukkimittari(App):
 
 Window.fullscreen = 'auto'
 Tukkimittari().run()
-os.system('pkill python3')
+os.system('./stopgivarna.sh')
 GPIO.cleanup()
 
