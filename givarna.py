@@ -21,7 +21,7 @@ givare1 = True
 givare2 = True
 lastread = time.time()
 while True:
-    if time.time() - lastread > 0.00005:
+    if time.time() - lastread > 0.0001:
         oldcount = countcm
         if GPIO.input(21) == 1:
             givare1 = False
@@ -30,7 +30,7 @@ while True:
 
         if GPIO.input(20) == 1:
             givare2 = False
-        if GPIO.input(20 == 0:
+        if GPIO.input(20) == 0:
             givare2 = True
 
         if givare1 == True and givare2 == False:
@@ -47,7 +47,7 @@ while True:
             counted = False
 
         if countcm != oldcount:
-            #print(str(countcm))
+            print(str(countcm))
             try:
                 f = open("/dev/shm/kaparens_givare", "w")
                 f.write(str(countcm))
