@@ -13,7 +13,7 @@ int main(void)
 
     int countcm = 0;
     int oldcount = 0;
-    int calib = 75;
+    int calib = 64;
 
     wiringPiSetup();
 

@@ -300,7 +300,7 @@ class Tukkimittari(App):
             App.get_running_app().stop()
 
         upper_button_grid = GridLayout(cols=6, size_hint_y=0.6)
-        screen_grid = GridLayout(cols=2, size_hint_y=3)
+        screen_grid = GridLayout(cols=2, size_hint_y=2)
         langd_display = Label(font_size=100)
         langd_tot_grid = GridLayout(cols=1, size_hint_x=0.5)
         langd_selected = Label(font_size=60, size_hint_y=2, halign="left", valign="bottom")
