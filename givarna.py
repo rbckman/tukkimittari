@@ -13,7 +13,7 @@ GPIO.setmode(GPIO.BCM)
 GPIO.setup(20, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 GPIO.setup(21, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
 
-calib = 200
+calib = 100
 countcm = 0
 oldcount = 0
 counted = False
@@ -21,7 +21,7 @@ givare1 = True
 givare2 = True
 lastread = time.time()
 while True:
-    if time.time() - lastread > 0.0001:
+    if time.time() - lastread > 0.00005:
         oldcount = countcm
         if GPIO.input(21) == 1:
             givare1 = False
