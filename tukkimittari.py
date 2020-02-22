@@ -150,7 +150,7 @@ class Tukkimittari(App):
             try:
                 f = open("/dev/shm/givarna", "r")
                 givarna = f.read()
-                givarna = int(givarna) * 0.01
+                givarna = float(givarna) * 0.00001
             except:
                 givarna = givarna_old
             givarna_old = givarna

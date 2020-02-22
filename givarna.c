@@ -13,7 +13,7 @@ int main(void)
 
     int countcm = 0;
     int oldcount = 0;
-    int calib = 64;
+    int calib = 65000; //micrometer
 
     wiringPiSetup();
 
@@ -26,25 +26,28 @@ int main(void)
 
         if ((digitalRead(givare2) == HIGH) && (digitalRead(givare1) == HIGH) && (counted == true)) {
             counted = false;
+            usleep(5);
         }
 
         else if ((digitalRead(givare1) == LOW) && (digitalRead(givare2) == HIGH) && (counted == false)) {
             countcm = countcm + calib;
             counted = true;
+            usleep(5);
         }
 
         else if ((digitalRead(givare1) == HIGH) && (digitalRead(givare2) == LOW) && (counted == false)) {
             countcm = countcm - calib;
             counted = true;
+            usleep(5);
         }
 
-        if (oldcount != countcm){
+        if (oldcount != countcm) {
             printf("%d\n", countcm);
             givarna = fopen("/dev/shm/givarna","w+");
             fprintf(givarna, "%d", countcm);
             fclose(givarna);
         }
-        usleep(50);
+        usleep(1);
     }
     return 0;
 }
