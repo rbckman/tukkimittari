@@ -13,15 +13,16 @@ int main(void)
 
     int countcm = 0;
     int oldcount = 0;
-    int calib = 65000; //micrometer
+    int calib = 65750; //micrometer
 
     wiringPiSetup();
 
     pinMode(givare1, INPUT);
     pinMode(givare2, INPUT);
+    pullUpDnControl(givare1, PUD_DOWN);
+    pullUpDnControl(givare2, PUD_DOWN);
 
     while (1) {
-        FILE * givarna;
         oldcount = countcm;
 
         if ((digitalRead(givare2) == HIGH) && (digitalRead(givare1) == HIGH) && (counted == true)) {
@@ -42,7 +43,8 @@ int main(void)
         }
 
         if (oldcount != countcm) {
-            printf("%d\n", countcm);
+            FILE * givarna;
+            //printf("%d\n", countcm);
             givarna = fopen("/dev/shm/givarna","w+");
             fprintf(givarna, "%d", countcm);
             fclose(givarna);

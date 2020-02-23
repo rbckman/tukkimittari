@@ -132,14 +132,15 @@ givarna_tot = 0.0
 givarna = 0.0
 nolla_givarna = False
 add_tot = False
+stoprelay = True
 btntime = time.time()
-
+relaytid = time.time()
 
 class Tukkimittari(App):
 
     def build(self):
         def las_givarna(dt):
-            global givarna_tot, givarna, givarna_old, add_tot, btntime, nolla_givarna
+            global givarna_tot, givarna, givarna_old, add_tot, btntime, nolla_givarna, relaytid, stoprelay
             if givarna_tot == None:
                 givarna_tot = 0.0
 
@@ -165,10 +166,12 @@ class Tukkimittari(App):
                 if add_tot == True:
                     tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
                 givarna_tot = givarna 
+                stoprelay = True
                 #print(givarna_tot)
 
             # NOLLA
             if nolla_givarna == True:
+                stoprelay = True
                 givarna_tot = givarna 
                 nolla_givarna = False
 
@@ -201,10 +204,15 @@ class Tukkimittari(App):
                 langd = 0.0
 
             # RELAY PÅ / AV
-            if givarna - givarna_tot >= langd:
+            if (givarna - givarna_tot) >= (langd - 23) and stoprelay == True:
+                relaytid = time.time()
+                stoprelay = False
+                GPIO.output(2, GPIO.HIGH)
+            elif (givarna - givarna_tot) >= (langd - 23) and time.time() - relaytid < 1:
                 GPIO.output(2, GPIO.HIGH)
             else:
                 GPIO.output(2, GPIO.LOW)
+
 
             # DISPLAY
             langd_display.text = str(round(givarna - givarna_tot)) + ' cm'
