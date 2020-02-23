@@ -208,7 +208,7 @@ class Tukkimittari(App):
                 relaytid = time.time()
                 stoprelay = False
                 GPIO.output(2, GPIO.HIGH)
-            elif (givarna - givarna_tot) >= (langd - 23) and time.time() - relaytid < 1:
+            elif (givarna - givarna_tot) >= (langd - 23) and time.time() - relaytid < 1.5:
                 GPIO.output(2, GPIO.HIGH)
             else:
                 GPIO.output(2, GPIO.LOW)
@@ -241,11 +241,15 @@ class Tukkimittari(App):
                 button.bind(on_press=tra_button_action)
 
         def edit_tra_slag(instance):
+            global stoprelay
+            stoprelay = True
             tra_data_edit_langd(tra_data, sort_input.text, langd_input.text)
 
         def add_tra_slag(instance):
+            global stoprelay
             tra_data_add(tra_data, sort_input.text, langd_input.text, 0)
             tra_button_grid.add_widget(Button(text=sort_input.text))
+            stoprelay = True
             update_buttons()
 
         def nolla(instance):
@@ -282,6 +286,8 @@ class Tukkimittari(App):
 
  
         def tra_button_action(instance):
+            global stoprelay
+            stoprelay = True
             sort_input.text = instance.text
             langd_input.text = tra_data_langd(tra_data, instance.text)
 
