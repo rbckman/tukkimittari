@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # TUKKIMITTARI
-# by Robin Bäckman
-# 2020
+# (c) 2020 Hansson Service & Robin Bäckman
 
 from kivy.app import App
 from kivy.uix.button import Button
