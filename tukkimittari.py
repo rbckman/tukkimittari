@@ -157,7 +157,7 @@ class Tukkimittari(App):
 
             # CHECK IF FILE WAS READ OK
             r = givarna - givarna_old
-            if -50.0 <= r <= 50.00:
+            if -50.0 <= r <= 50.00 or r == 0.0:
                 givarna_old = givarna
             else:
                 givarna = givarna_old
@@ -240,7 +240,7 @@ class Tukkimittari(App):
 
         def count_tra_slag():
             for tra in tra_data:
-                tra_button_grid.add_widget(Button(text=tra['slag'], font_size=25))
+                tra_button_grid.add_widget(Button(text=tra['slag'], font_size=23, halign="center"))
 
         def update_buttons():
             for button in tra_button_grid.children:
