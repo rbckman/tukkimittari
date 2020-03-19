@@ -147,13 +147,20 @@ class Tukkimittari(App):
             #    givarna_tot + givarna_tot + 2
 
             # LÄS GIVARNA
+            givarna_old = givarna
             try:
                 f = open("/dev/shm/givarna", "r")
                 givarna = f.read()
                 givarna = float(givarna) * 0.00001
             except:
                 givarna = givarna_old
-            givarna_old = givarna
+
+            # CHECK IF FILE WAS READ OK
+            r = givarna - givarna_old
+            if -50.0 <= r <= 50.00:
+                givarna_old = givarna
+            else:
+                givarna = givarna_old
 
             # LÄS TRÄ SORTER
             sort = sort_input.text
@@ -233,7 +240,7 @@ class Tukkimittari(App):
 
         def count_tra_slag():
             for tra in tra_data:
-                tra_button_grid.add_widget(Button(text=tra['slag']))
+                tra_button_grid.add_widget(Button(text=tra['slag'], font_size=25))
 
         def update_buttons():
             for button in tra_button_grid.children:
@@ -324,11 +331,10 @@ class Tukkimittari(App):
         edit_button_grid = GridLayout(cols=6, size_hint_y=2)
         tra_button_grid = GridLayout(cols=10, size_hint_y=2)
 
-
         count_tra_slag()
 
-        sort_input = TextInput(text='sort', halign='center', multiline=False, font_size=25)
-        langd_input = TextInput(text='langd', halign='center', multiline=False, font_size=25)
+        sort_input = TextInput(text='sort', halign='center', multiline=False, font_size=35)
+        langd_input = TextInput(text='langd', halign='center', multiline=False, font_size=35)
 
         apply_button = Button(text='Apply')
         apply_button.bind(on_press=edit_tra_slag)
