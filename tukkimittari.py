@@ -214,6 +214,8 @@ class Tukkimittari(App):
                 relaytid = time.time()
                 stoprelay = False
                 GPIO.output(2, GPIO.HIGH)
+            elif (givarna - givarna_tot) < (langd - 23) and stoprelay == False:
+                stoprelay = True
             elif (givarna - givarna_tot) >= (langd - 23) and time.time() - relaytid < 1.5:
                 GPIO.output(2, GPIO.HIGH)
             else:
