@@ -45,7 +45,7 @@ int main(void)
         if (oldcount != countcm) {
             FILE * givarna;
             //printf("%d\n", countcm);
-            givarna = fopen("/dev/shm/givarna","w");
+            givarna = fopen("/dev/shm/givarna","w+");
             fprintf(givarna, "%d", countcm);
             fclose(givarna);
         }
