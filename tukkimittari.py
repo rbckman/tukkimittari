@@ -90,7 +90,18 @@ def tra_data_lista(tra_data):
     for i in tra_data:
         tra_lista.append(i['slag'])
     return tra_lista
-     
+
+def tra_data_next(tra_data, slag):
+    p = 0
+    l = len(tra_data)
+    for i in tra_data:
+        if i['slag'] == slag:
+            if p < l:
+                return tra_data[p + 1]['slag'] 
+            else:
+                return tra_data[0]['slag']
+            p += 1
+
 # PUT
 
 def tra_data_remove(tra_data, slag):
@@ -183,8 +194,10 @@ class Tukkimittari(App):
 
             # ADD TOT LANGD
             if GPIO.input(17) == False:
-                print(time.time() - btntime)
-                if time.time() - btntime > 1:
+                #print(time.time() - btntime)
+                if time.time() - btntime > 0.1 and btntime < 2:
+                    tra_data_next(tra_data, sort)
+                if time.time() - btntime > 2:
                     if add_tot == True:
                         add_tot = False
                         btntime = time.time()
@@ -223,6 +236,7 @@ class Tukkimittari(App):
 
 
             # DISPLAY
+            langd_sort.text = sort
             langd_display.text = str(round(givarna - givarna_tot)) + ' cm'
             langd_selected.text = str(round(langd)) + ' cm'
             langd_tot.text = 'tot. ' + str(round(totlangd*0.01,1)) + ' m'
@@ -327,6 +341,7 @@ class Tukkimittari(App):
         langd_tot_grid = GridLayout(cols=1, size_hint_x=0.5)
         langd_selected = Label(font_size=60, size_hint_y=2, halign="left", valign="bottom")
         langd_tot = Label(font_size=30, halign="left", valign="top")
+        langd_sort.color = [1,0,0,1]
         langd_display.color = [1,0,0,1]
         langd_selected.color = [1,0,0,1]
         langd_tot.color = [1,0,0,1]
@@ -372,6 +387,7 @@ class Tukkimittari(App):
 
         screen_grid.add_widget(langd_display)
         screen_grid.add_widget(langd_tot_grid)
+        langd_tot_grid.add_widget(langd_sort)
         langd_tot_grid.add_widget(langd_selected)
         langd_tot_grid.add_widget(langd_tot)
 
