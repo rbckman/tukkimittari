@@ -100,7 +100,7 @@ def tra_data_next(tra_data, slag):
                 return tra_data[p + 1]['slag'] 
             else:
                 return tra_data[0]['slag']
-            p += 1
+            p = p + 1
 
 # PUT
 
@@ -143,14 +143,17 @@ givarna = 0.0
 nolla_givarna = False
 add_tot = False
 stoprelay = True
-btntime = time.time()
+btnpress = time.time()
+btnrelease = time.time()
+addbtn = False
 relaytid = time.time()
+sort = tra_data[0]['slag']
 
 class Tukkimittari(App):
 
     def build(self):
         def las_givarna(dt):
-            global givarna_tot, givarna, givarna_old, add_tot, btntime, nolla_givarna, relaytid, stoprelay
+            global sort, givarna_tot, givarna, givarna_old, add_tot, btnpress, btnrelease, addbtn, nolla_givarna, relaytid, stoprelay
             if givarna_tot == None:
                 givarna_tot = 0.0
 
@@ -192,27 +195,35 @@ class Tukkimittari(App):
                 givarna_tot = givarna 
                 nolla_givarna = False
 
+            if GPIO.input(17) == True:
+                btnrelease = time.time()
+                addbtn = True
+                if time.time() - btnpress < 1:
+                    sort = tra_data_next(tra_data, sort)
+                    print(tra_data)
+
             # ADD TOT LANGD
             if GPIO.input(17) == False:
-                #print(time.time() - btntime)
-                if time.time() - btntime > 0.1 and btntime < 2:
-                    tra_data_next(tra_data, sort)
-                if time.time() - btntime > 2:
+                if addbtn == True:
+                    btnpress = time.time()
+                    addbtn = False
+                #print(time.time() - btnpress)
+                if time.time() - btnpress > 1:
                     if add_tot == True:
                         add_tot = False
-                        btntime = time.time()
+                        btnpress = time.time()
                         adding_label.text = 'NOPE'
                         langd_display.color = [1,0,0,1]
                         langd_selected.color = [1,0,0,1]
                         langd_tot.color = [1,0,0,1]
                     else:
                         add_tot = True
-                        btntime = time.time()
+                        btnpress = time.time()
                         adding_label.text = 'ADDING'
                         langd_display.color = [0,1,0,1]
                         langd_selected.color = [0,1,0,1]
                         langd_tot.color = [0,1,0,1]
-                    #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot)
+                    #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot) 
 
             if sort in tra_lista:
                 totlangd = tra_data_totlangd(tra_data, sort)
@@ -340,13 +351,14 @@ class Tukkimittari(App):
         langd_display = Label(font_size=100)
         langd_tot_grid = GridLayout(cols=1, size_hint_x=0.5)
         langd_selected = Label(font_size=60, size_hint_y=2, halign="left", valign="bottom")
+        langd_sort = Label(font_size=60)
         langd_tot = Label(font_size=30, halign="left", valign="top")
         langd_sort.color = [1,0,0,1]
         langd_display.color = [1,0,0,1]
         langd_selected.color = [1,0,0,1]
         langd_tot.color = [1,0,0,1]
-        edit_button_grid = GridLayout(cols=6, size_hint_y=2)
-        tra_button_grid = GridLayout(cols=10, size_hint_y=2)
+        edit_button_grid = GridLayout(cols=6, size_hint_y=1)
+        tra_button_grid = GridLayout(cols=10, size_hint_y=1)
 
         count_tra_slag()
 
