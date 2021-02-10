@@ -198,10 +198,11 @@ class Tukkimittari(App):
 
             if GPIO.input(17) == True:
                 btnrelease = time.time()
-                if time.time() - btnpress > 0.1 and addbtn == False:
-                    sort = tra_data_next(tra_data, sort)
-                    print(sort)
-                    print(tra_data)
+                if (time.time() - btnpress) < 1.0:
+                    if addbtn == False:
+                        sort = tra_data_next(tra_data, sort)
+                        print(sort)
+                        print(tra_data)
                 addbtn = True
 
             # ADD TOT LANGD
@@ -209,23 +210,34 @@ class Tukkimittari(App):
                 if addbtn == True:
                     btnpress = time.time()
                     addbtn = False
+
                 #print(time.time() - btnpress)
-                if time.time() - btnpress > 1:
+                elif time.time() - btnpress > 1.0:
+                    btnpress = time.time()
+                    addbtn = True
                     if add_tot == True:
                         add_tot = False
-                        btnpress = time.time()
                         adding_label.text = 'NOPE'
                         langd_display.color = [1,0,0,1]
                         langd_selected.color = [1,0,0,1]
                         langd_tot.color = [1,0,0,1]
                     else:
                         add_tot = True
-                        btnpress = time.time()
                         adding_label.text = 'ADDING'
                         langd_display.color = [0,1,0,1]
                         langd_selected.color = [0,1,0,1]
                         langd_tot.color = [0,1,0,1]
                     #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot) 
+
+            if GPIO.input(17) == True:
+                btnrelease = time.time()
+                if (time.time() - btnpress) < 1.0:
+                    if addbtn == False:
+                        sort = tra_data_next(tra_data, sort)
+                        print(sort)
+                        print(tra_data)
+                addbtn = True
+
 
             if sort in tra_lista:
                 totlangd = tra_data_totlangd(tra_data, sort)
