@@ -145,9 +145,8 @@ nolla_givarna = False
 add_tot = False
 stoprelay = True
 btntime = time.time()
-btnrelease = time.time()
 btnpush = False
-btnrelease = False
+btnrelease = True
 relaytid = time.time()
 sort = tra_data[0]['slag']
 
