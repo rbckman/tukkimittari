@@ -144,9 +144,10 @@ givarna = 0.0
 nolla_givarna = False
 add_tot = False
 stoprelay = True
-btnpress = time.time()
+btntime = time.time()
 btnrelease = time.time()
-addbtn = False
+btnpush = False
+btnrelease = False
 relaytid = time.time()
 sort = tra_data[0]['slag']
 
@@ -154,7 +155,7 @@ class Tukkimittari(App):
 
     def build(self):
         def las_givarna(dt):
-            global sort, givarna_tot, givarna, givarna_old, add_tot, btnpress, btnrelease, addbtn, nolla_givarna, relaytid, stoprelay
+            global sort, givarna_tot, givarna, givarna_old, add_tot, btntime, btnrelease, btnpush, nolla_givarna, relaytid, stoprelay
             if givarna_tot == None:
                 givarna_tot = 0.0
 
@@ -198,46 +199,45 @@ class Tukkimittari(App):
 
             if GPIO.input(17) == True:
                 btnrelease = time.time()
-                if (time.time() - btnpress) < 1.0:
-                    if addbtn == False:
+                if (time.time() - btntime) < 1.0:
+                    if btnpush == True:
                         sort = tra_data_next(tra_data, sort)
                         print(sort)
                         print(tra_data)
-                addbtn = True
+                btnpush = False
 
             # ADD TOT LANGD
             if GPIO.input(17) == False:
-                if addbtn == True:
-                    btnpress = time.time()
-                    addbtn = False
+                if btnpush == False:
+                    btntime = time.time()
+                    btnpush = True
 
-                #print(time.time() - btnpress)
-                elif time.time() - btnpress > 1.0:
-                    btnpress = time.time()
-                    addbtn = True
-                    if add_tot == True:
-                        add_tot = False
-                        adding_label.text = 'NOPE'
-                        langd_display.color = [1,0,0,1]
-                        langd_selected.color = [1,0,0,1]
-                        langd_tot.color = [1,0,0,1]
-                    else:
-                        add_tot = True
-                        adding_label.text = 'ADDING'
-                        langd_display.color = [0,1,0,1]
-                        langd_selected.color = [0,1,0,1]
-                        langd_tot.color = [0,1,0,1]
-                    #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot) 
+                #print(time.time() - btntime)
+                elif time.time() - btntime > 1.0:
+                    if btnrelease == True:
+                        btnrelease = False
+                        if add_tot == True:
+                            add_tot = False
+                            adding_label.text = 'NOPE'
+                            langd_display.color = [1,0,0,1]
+                            langd_selected.color = [1,0,0,1]
+                            langd_tot.color = [1,0,0,1]
+                        else:
+                            add_tot = True
+                            adding_label.text = 'ADDING'
+                            langd_display.color = [0,1,0,1]
+                            langd_selected.color = [0,1,0,1]
+                            langd_tot.color = [0,1,0,1]
+                        #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot) 
 
             if GPIO.input(17) == True:
-                btnrelease = time.time()
-                if (time.time() - btnpress) < 1.0:
-                    if addbtn == False:
+                if (time.time() - btntime) < 1.0:
+                    if btnpush == True:
                         sort = tra_data_next(tra_data, sort)
                         print(sort)
                         print(tra_data)
-                addbtn = True
-
+                        btnpush = False
+                        btnrelease = True
 
             if sort in tra_lista:
                 totlangd = tra_data_totlangd(tra_data, sort)
