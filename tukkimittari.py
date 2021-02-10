@@ -94,13 +94,14 @@ def tra_data_lista(tra_data):
 def tra_data_next(tra_data, slag):
     p = 0
     l = len(tra_data)
+    print(str(len(tra_data)))
     for i in tra_data:
         if i['slag'] == slag:
-            if p < l:
+            if p < (l - 1):
                 return tra_data[p + 1]['slag'] 
             else:
                 return tra_data[0]['slag']
-            p = p + 1
+        p = p + 1
 
 # PUT
 
@@ -177,7 +178,7 @@ class Tukkimittari(App):
                 givarna = givarna_old
 
             # LÄS TRÄ SORTER
-            sort = sort_input.text
+            #sort = sort_input.text
             tra_lista = tra_data_lista(tra_data)
 
             # SVÄRD
@@ -197,10 +198,11 @@ class Tukkimittari(App):
 
             if GPIO.input(17) == True:
                 btnrelease = time.time()
-                addbtn = True
-                if time.time() - btnpress < 1:
+                if time.time() - btnpress > 0.1 and addbtn == False:
                     sort = tra_data_next(tra_data, sort)
+                    print(sort)
                     print(tra_data)
+                addbtn = True
 
             # ADD TOT LANGD
             if GPIO.input(17) == False:
