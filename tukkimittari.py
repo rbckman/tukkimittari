@@ -196,21 +196,12 @@ class Tukkimittari(App):
                 givarna_tot = givarna 
                 nolla_givarna = False
 
-            if GPIO.input(17) == True:
-                btnrelease = time.time()
-                if (time.time() - btntime) < 1.0:
-                    if btnpush == True:
-                        sort = tra_data_next(tra_data, sort)
-                        print(sort)
-                        print(tra_data)
-                btnpush = False
-
-            # ADD TOT LANGD
+            # TA TID PÅ KNAPPEN ADD
             if GPIO.input(17) == False:
                 if btnpush == False:
                     btntime = time.time()
                     btnpush = True
-
+                # ADD
                 #print(time.time() - btntime)
                 elif time.time() - btntime > 1.0:
                     if btnrelease == True:
@@ -228,7 +219,7 @@ class Tukkimittari(App):
                             langd_selected.color = [0,1,0,1]
                             langd_tot.color = [0,1,0,1]
                         #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot) 
-
+            # VÄLJ TRÄ SLAG MED SNABB TRYCKNING
             if GPIO.input(17) == True:
                 if (time.time() - btntime) < 1.0:
                     if btnpush == True:
