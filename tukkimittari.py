@@ -206,6 +206,7 @@ class Tukkimittari(App):
                 elif time.time() - btntime > 1.0:
                     if btnrelease == True:
                         btnrelease = False
+                        btnpush = False
                         if add_tot == True:
                             add_tot = False
                             adding_label.text = 'NOPE'
