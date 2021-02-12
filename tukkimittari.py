@@ -145,8 +145,8 @@ nolla_givarna = False
 add_tot = False
 stoprelay = True
 btntime = time.time()
-btnpush = False
-btnrelease = True
+btnsort = False
+btnadd = True
 relaytid = time.time()
 sort = tra_data[0]['slag']
 
@@ -154,7 +154,7 @@ class Tukkimittari(App):
 
     def build(self):
         def las_givarna(dt):
-            global sort, givarna_tot, givarna, givarna_old, add_tot, btntime, btnrelease, btnpush, nolla_givarna, relaytid, stoprelay
+            global sort, givarna_tot, givarna, givarna_old, add_tot, btntime, btnadd, btnsort, nolla_givarna, relaytid, stoprelay
             if givarna_tot == None:
                 givarna_tot = 0.0
 
@@ -198,15 +198,15 @@ class Tukkimittari(App):
 
             # TA TID PÅ KNAPPEN ADD
             if GPIO.input(17) == False:
-                if btnpush == False:
+                if btnsort == False:
                     btntime = time.time()
-                    btnpush = True
+                    btnsort = True
                 # ADD
                 #print(time.time() - btntime)
                 elif time.time() - btntime > 1.0:
-                    if btnrelease == True:
-                        btnrelease = False
-                        btnpush = False
+                    if btnadd == True:
+                        btnadd = False
+                        btnsort = False
                         if add_tot == True:
                             add_tot = False
                             adding_label.text = 'NOPE'
@@ -222,13 +222,13 @@ class Tukkimittari(App):
                         #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot) 
             # VÄLJ TRÄ SLAG MED SNABB TRYCKNING
             if GPIO.input(17) == True:
+                btnadd = True
                 if (time.time() - btntime) < 1.0:
-                    if btnpush == True:
+                    if btnsort == True:
                         sort = tra_data_next(tra_data, sort)
                         print(sort)
                         print(tra_data)
-                        btnpush = False
-                        btnrelease = True
+                        btnsort = False
 
             if sort in tra_lista:
                 totlangd = tra_data_totlangd(tra_data, sort)
