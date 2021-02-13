@@ -146,7 +146,7 @@ add_tot = False
 stoprelay = True
 btntime = time.time()
 btnsort = False
-btnadd = True
+btnadd = False
 relaytid = time.time()
 sort = tra_data[0]['slag']
 
@@ -198,15 +198,14 @@ class Tukkimittari(App):
 
             # TA TID PÅ KNAPPEN ADD
             if GPIO.input(17) == False:
-                if btnsort == False:
+                if btnadd == False:
                     btntime = time.time()
-                    btnsort = True
+                    btnadd = True
                 # ADD
                 #print(time.time() - btntime)
                 elif time.time() - btntime > 1.0:
-                    if btnadd == True:
-                        btnadd = False
-                        btnsort = False
+                    if btnsort == False:
+                        btnsort = True
                         if add_tot == True:
                             add_tot = False
                             adding_label.text = 'NOPE'
@@ -222,13 +221,13 @@ class Tukkimittari(App):
                         #tra_data_totlangd_add(tra_data, sort, givarna - givarna_tot) 
             # VÄLJ TRÄ SLAG MED SNABB TRYCKNING
             if GPIO.input(17) == True:
-                btnadd = True
-                if (time.time() - btntime) < 1.0:
-                    if btnsort == True:
+                if btnadd == True:
+                    if (time.time() - btntime) < 1.0:
                         sort = tra_data_next(tra_data, sort)
                         print(sort)
                         print(tra_data)
-                        btnsort = False
+                    btnadd = False
+                    btnsort = False
 
             if sort in tra_lista:
                 totlangd = tra_data_totlangd(tra_data, sort)
