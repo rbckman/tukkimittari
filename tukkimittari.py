@@ -203,7 +203,7 @@ class Tukkimittari(App):
                     btnadd = True
                 # ADD
                 #print(time.time() - btntime)
-                elif time.time() - btntime > 0.5:
+                elif time.time() - btntime > 0.3:
                     if btnsort == False:
                         btnsort = True
                         if add_tot == True:
@@ -222,7 +222,7 @@ class Tukkimittari(App):
             # VÄLJ TRÄ SLAG MED SNABB TRYCKNING
             if GPIO.input(17) == True:
                 if btnadd == True:
-                    if (time.time() - btntime) < 0.5:
+                    if (time.time() - btntime) < 0.3:
                         sort = tra_data_next(tra_data, sort)
                         print(sort)
                         print(tra_data)
