@@ -14,7 +14,7 @@ int main(void)
     int countcm = 0;
     int oldcount = 0;
     //int calib = 65750; //micrometer
-    int calib = 43800; //micrometer
+    int calib = 98600; //micrometer
 
     wiringPiSetup();
 
