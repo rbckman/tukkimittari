@@ -11,8 +11,8 @@ int main(void)
     const int givare2 = 5;
     bool counted = false;
 
-    int countcm = 0;
-    int oldcount = 0;
+    long countcm = 0;
+    long oldcount = 0;
     //int calib = 65750; //micrometer
     int calib = 98600; //micrometer
 
@@ -47,7 +47,7 @@ int main(void)
             FILE * givarna;
             //printf("%d\n", countcm);
             givarna = fopen("/dev/shm/givarna","w+");
-            fprintf(givarna, "%d", countcm);
+            fprintf(givarna, "%ld", countcm);
             fclose(givarna);
         }
         usleep(1);
