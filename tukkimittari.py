@@ -31,6 +31,8 @@ GPIO.setup(3, GPIO.IN, pull_up_down=GPIO.PUD_UP) #SVÄRD
 
 GPIO.output(2, GPIO.LOW)
 
+#VKeyboard.docked = False
+#VKeyboard.setup_mode_free
 
 # Get path of the current dir, then use it as working directory:
 rundir = os.path.dirname(__file__)
