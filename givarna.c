@@ -9,7 +9,9 @@ int main(void)
     // Switch: Physical pin 31, BCM GPIO6, and WiringPi pin 22.
     const int givare1 = 4;
     const int givare2 = 5;
-    bool counted = false;
+    bool counted = true;
+    int rp;
+    int rp_array[2] = (5,5);
 
     long countcm = 0;
     long oldcount = 0;
@@ -25,24 +27,40 @@ int main(void)
 
     while (1) {
         oldcount = countcm;
-
+        rp_array[1] = rp;
         if ((digitalRead(givare2) == HIGH) && (digitalRead(givare1) == HIGH) && (counted == true)) {
             counted = false;
-            usleep(5);
+            rp = 0;
+            usleep(1);
         }
-
-        else if ((digitalRead(givare1) == LOW) && (digitalRead(givare2) == HIGH) && (counted == false)) {
-            countcm = countcm + calib;
-            counted = true;
-            usleep(5);
+        else if ((digitalRead(givare2) == LOW) && (digitalRead(givare1) == LOW) && (counted == true)) {
+            counted = false;
+            rp = 2;
+            usleep(1);
         }
-
-        else if ((digitalRead(givare1) == HIGH) && (digitalRead(givare2) == LOW) && (counted == false)) {
-            countcm = countcm - calib;
-            counted = true;
-            usleep(5);
+        else if ((digitalRead(givare1) == LOW) && (digitalRead(givare2) == HIGH) && (counted == true)) {
+            counted = false;
+            rp = 1;
+            usleep(1);
         }
-
+        else if ((digitalRead(givare1) == HIGH) && (digitalRead(givare2) == LOW) && (counted == true)) {
+            counted = false;
+            rp = 3;
+            usleep(1);
+        }
+        rp_array[0] = rp;
+        if ((rp_array == (0,3)) || (rp_array == (3,2)) || (rp_array == (2,1)) || (rp_array == (1,0))) {
+            if (counted == false) {
+                countcm = countcm + calib;
+                counted = true;
+            }
+        }
+        else if ((rp_array == (0,1)) || (rp_array == (1,2)) || (rp_array == (2,3)) || (rp_array == (3,0))) {
+            if (counted == false) {
+                countcm = countcm - calib;
+                counted = true;
+            }
+        }
         if (oldcount != countcm) {
             FILE * givarna;
             //printf("%d\n", countcm);
