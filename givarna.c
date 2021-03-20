@@ -11,7 +11,8 @@ int main(void)
     const int givare2 = 5;
     bool counted = true;
     int rp;
-    int rp_array[2] = (5,5);
+    int rp_array1 = 5;
+    int rp_array2 = 5;
 
     long countcm = 0;
     long oldcount = 0;
@@ -27,7 +28,7 @@ int main(void)
 
     while (1) {
         oldcount = countcm;
-        rp_array[1] = rp;
+        rp_array2 = rp;
         if ((digitalRead(givare2) == HIGH) && (digitalRead(givare1) == HIGH) && (counted == true)) {
             counted = false;
             rp = 0;
@@ -48,14 +49,14 @@ int main(void)
             rp = 3;
             usleep(1);
         }
-        rp_array[0] = rp;
-        if ((rp_array == (0,3)) || (rp_array == (3,2)) || (rp_array == (2,1)) || (rp_array == (1,0))) {
+        rp_array1 = rp;
+        if ((rp_array1 == 0 && rp_array2 == 3) || (rp_array1 == 3 && rp_array2 == 2) || (rp_array1 == 2 && rp_array2 == 1) || (rp_array == 1 && rp_array2 = 0)) {
             if (counted == false) {
                 countcm = countcm + calib;
                 counted = true;
             }
         }
-        else if ((rp_array == (0,1)) || (rp_array == (1,2)) || (rp_array == (2,3)) || (rp_array == (3,0))) {
+        else if ((rp_array1 == 0 && rp_array2 == 1) || (rp_array2 == 1 && rp_array2 = 2) || (rp_array1 == 2 && rp_array2 = 3) || (rp_array1 == 3 && rp_array2 == 0)) {
             if (counted == false) {
                 countcm = countcm - calib;
                 counted = true;
